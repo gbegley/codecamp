@@ -1,13 +1,47 @@
+<!-- ===================
+code comments start Here
+
+Comments can inside an open bracket "<" followed by "!--" and end in "--" followed by a close bracket ">"
+
+
+"<!doctype html>"  Normally start to a page and is a signal to the browser that this page follows modern standards
+
+The normal structure of a webpage is
+
+html |
+      ---- head |            <=== head is content that is not displayed, but contains instructions and links to resources
+                |
+                 ---- meta  (describes content on the page, for lots of reasons, don't worry about this for now)
+                |
+                 ---- title
+                |
+                 ---- script
+                |
+                 ---- link
+    |
+    |
+      ---- body             <=== body is content that is displayed
+
 <html>
-<!--  Comments can inside these  -->
+ <head>
+ </head>
+ <body>
+ </body>
+</html>
+
+code comments end Here
+========================
+-->
+<!doctype html>
+<html>
+
+
 <head>
     <!--
         Head Section Usually include a Title, Meta Tags, Scripts and Styles
     -->
 
     <title> A Very Basic Web Page </title>
-
-
 
     </head>
     <body>
@@ -45,18 +79,67 @@
             </ol>
         </p>
 
+
+
+        <!--
+             This is the "canvas" node. It's tag id "div" which is basically a general purpose
+             block of content within the body of the page's document.
+
+             The script below will reference this node by it's "id" or identifier attribute
+
+             The node's id is "canvas"
+        -->
         <div id="canvas">
 
         </div>
 
 
+
+
         <script>
 
-            // In Scripts, a double slash makes the line a comment.
-            // This is a basic script that generates some "p" nodes with some values
+            // Inside a script TAG, a double slash makes the line a comment.
+            // This is a basic script that generates some "p", or "paragraph"
+            // nodes within the "div#canvas" element above.
 
-            // const c = document.getElementById('canvas');
-            // [1,2,3].forEach(i => { var p = document.createElement("p"); p.innerHTML= i; c.append(p);})
+            // Within a script, "const" is one way to declare a variable.
+            //      (Note: others variable declaration keywords are "let" or "var",
+            //       but "const" is usually the right choice)
+            //
+            // "document" refers to the entire page
+            // "getElementById" is a "function" on document that will find the "node" with that ID
+            //      Note: a node's "id" should be unique within the document
+            //
+            // After the next line, the script has a "canvasNode" variable that references
+            // the "div#canvas" node above.
+            const canvasNode = document.getElementById('canvas');
+
+
+            // declare an "array" which is basically an ordered list of items
+            // The variable is "blocks" and it is assigned an array containing three elements 1,2,3
+            const blocks = [1,2,3];
+
+
+            // Here we are declaring a function to add a block of content to the canvas node
+            // the function's parameter list, that is, the stuff between the parenthesis "(...)"
+            // takes a single parameter "t" which will contain text that will be placed inside the
+            // created element
+            function addBlock( t ) {
+                var p = document.createElement("p");        // create a "p" tag element node in the page's document.
+                p.innerHTML = t;    // put some HTML code into the node
+
+                // append the "p" paragraph element to the "canvasNode" element
+                // this will add "p" to end of any content already inside the "canvasNode" element
+                canvasNode.append(p);
+            }
+            // (end of the "addBlock" function)
+
+
+            // Now we are ready to add some content to the canvasNode element
+            addBlock("Hello World");
+            addBlock("Pugs Rule!");
+            addBlock("Rottweilers drool!");
+
 
         </script>
 
