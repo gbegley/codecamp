@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bouncing Ball</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <script>
+        // Get the canvas element
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+
+        // Set up the box boundaries
+        var boxWidth = canvas.width;
+        var boxHeight = canvas.height;
+
+        // Set up the ball properties
+        var ballRadius = 20;
+        var gravity = 0.4;
+        var bounceConstant = 0.75;
+        var upGravity = gravity * 0.33; // 33% of gravity when holding up
+        var downGravity = gravity * 2; // 200% of gravity when holding down
+        var jumpVelocity = -2 * ballRadius; // Jump velocity when not moving vertically
+        var launchVelocity = -10; // Velocity when launching with the "E" key
+
+        // Set up the obstacle properties
+        var obstacleX = boxWidth / 4;
+        var obstacleY = boxHeight / 2 - ballRadius;
+        var obstacleWidth = boxWidth / 2;
+        var obstacleHeight = ballRadius * 2;
+
+        // Set up the ball's initial position and velocity
+        var ballX = boxWidth / 2;
+        var ballY = boxHeight - ballRadius;
+        var dx = 0; // Horizontal velocity
+        var dy = 0; // Vertical velocity
+
+        // Key state
+        var keyState = {};
+
+        // Add event listeners for keydown and keyup events
+        window.addEventListener("keydown", function(event) {
+            keyState[event.keyCode] = true;
+
+            if (event.keyCode === 69 && ballY + ballRadius >= boxHeight) { // E key
+                dy = launchVelocity;
+            }
+        });
+
+        window.addEventListener("keyup", function(event) {
+            keyState[event.keyCode] = false;
+        });
+
+        // Check collision between the ball and the obstacle
+        function checkCollision() {
+            if (ballY + ballRadius > obstacleY && ballY - ballRadius < obstacleY + obstacleHeight &&
+                ballX + ballRadius > obstacleX && ballX - ballRadius < obstacleX + obstacleWidth) {
+                if (ballY - ballRadius <= obstacleY || ballY + ballRadius >= obstacleY + obstacleHeight) {
+                    dy *= -bounceConstant;
+                }
+                if (ballX - ballRadius <= obstacleX || ballX + ballRadius >= obstacleX + obstacleWidth) {
+                    dx *= -bounceConstant;
+                }
+                if (ballX + ballRadius > obstacleX && ballX - ballRadius < obstacleX + obstacleWidth) {
+                    if (ballY < obstacleY + obstacleHeight / 2) {
+                        ballY = obstacleY - ballRadius;
+                    } else {
+                        ballY = obstacleY + obstacleHeight + ballRadius;
+                    }
+                }
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            // Clear the canvas
+            context.clearRect(0, 0, boxWidth, boxHeight);
+
+            // Draw the obstacle
+            context.beginPath();
+            context.rect(obstacleX, obstacleY, obstacleWidth, obstacleHeight);
+            context.fillStyle = "gray";
+            context.fill();
+            context.closePath();
+
+            // Draw the ball
+            context.beginPath();
+            context.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            context.fillStyle = "red";
+            context.fill();
+            context.closePath();
+
+            // Apply gravity based on key input
+            if (keyState[87]) {  // W key
+                if (dy === 0) { // Only allow jumping when not moving vertically
+                    dy = jumpVelocity;
+                } else {
+                    dy += upGravity;
+                }
+            } else if (keyState[83]) {  // S key
+                dy += downGravity;
+            } else {
+                dy += gravity;
+            }
+
+            // Move the ball based on key input
+            if (keyState[65]) {  // A key
+                dx -= 1;
+            }
+            if (keyState[68]) {  // D key
+                dx += 1;
+            }
+
+            // Move the ball
+            ballX += dx;
+            ballY += dy;
+
+            // Check the boundaries and change direction
+            if (ballY + ballRadius > boxHeight) {
+                ballY = boxHeight - ballRadius;
+                dy *= -bounceConstant;
+            }
+
+            if (ballX + ballRadius > boxWidth || ballX - ballRadius < 0) {
+                dx *= -bounceConstant;
+            }
+
+            // Check collision with the obstacle
+            checkCollision();
+
+            // Request the next animation frame
+            requestAnimationFrame(animate);
+        }
+
+        // Start the animation
+        animate();
+    </script>
+</body>
+</html>
