@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>2D Semi-Circle with Physics-based Ball Movement</title>
+    <style>
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="semicircle" width="400" height="400"></canvas>
+
+    <script>
+      // Get the canvas element
+      var canvas = document.getElementById("semicircle");
+      var ctx = canvas.getContext("2d");
+
+      // Set up semi-circle properties
+      var centerX = canvas.width / 2;
+      var centerY = canvas.height / 2;
+      var radius = 150;
+      var startAngle = Math.PI;
+      var endAngle = 0;
+
+      // Set up ball properties
+      var ballRadius = 10;
+      var ballX = centerX;
+      var ballY = centerY + radius - ballRadius;
+      var ballVelocityX = 0;
+      var ballVelocityY = 0;
+      var ballAcceleration = 5;
+      var ballFriction = 0.99;
+      var rampAngle = Math.PI / 4; // Angle of the ramp in radians
+      var isOnRamp = false;
+
+      // Function to update the ball position
+      function updateBallPosition() {
+        // Update the ball's position based on velocity
+        ballX += ballVelocityX;
+        ballY += ballVelocityY;
+
+        // Apply friction to slow down the ball
+        ballVelocityX *= ballFriction;
+        ballVelocityY *= ballFriction;
+
+        // Check for collision with the semi-circle
+        var angle = Math.atan2(ballY - centerY, ballX - centerX);
+        var collisionX = centerX + radius * Math.cos(angle);
+        var collisionY = centerY + radius * Math.sin(angle);
+        var distance = Math.sqrt(Math.pow(ballX - collisionX, 2) + Math.pow(ballY - collisionY, 2));
+        if (distance < ballRadius) {
+          // Apply collision response
+          var normalX = ballX - collisionX;
+          var normalY = ballY - collisionY;
+          var magnitude = Math.sqrt(normalX * normalX + normalY * normalY);
+          normalX /= magnitude;
+          normalY /= magnitude;
+
+          ballX = collisionX + (ballRadius + 1) * normalX;
+          ballY = collisionY + (ballRadius + 1) * normalY;
+
+          // Calculate the new angle of the ramp based on the collision point
+          rampAngle = Math.atan2(collisionY - centerY, collisionX - centerX);
+
+          // Check if the ball is on the ramp
+          isOnRamp = true;
+
+          // Reset the ball's vertical velocity when it lands on the ramp
+          ballVelocityY = 0;
+        } else {
+          // If the ball is not on the ramp, it's in the air
+          isOnRamp = false;
+
+          // Apply gravity force
+          ballVelocityY += 0.1;
+        }
+
+        // Check for collision with canvas walls
+        if (ballX - ballRadius < 0) {
+          ballX = ballRadius;
+        } else if (ballX + ballRadius > canvas.width) {
+          ballX = canvas.width - ballRadius;
+        }
+
+        // Prevent the ball from falling through the floor
+        if (ballY + ballRadius > canvas.height) {
+          ballY = canvas.height - ballRadius;
+          ballVelocityY = 0;
+        }
+
+        // Prevent the ball from going above the canvas
+        if (ballY - ballRadius < 0) {
+          ballY = ballRadius;
+        }
+
+        // If the ball is on the ramp, apply the ramp's angle to the ball's velocity
+        if (isOnRamp) {
+          var speed = Math.sqrt(ballVelocityX * ballVelocityX + ballVelocityY * ballVelocityY);
+          ballVelocityX = speed * Math.cos(rampAngle);
+          ballVelocityY = speed * Math.sin(rampAngle);
+        }
+
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the semi-circle arc
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle, true);
+        ctx.stroke();
+
+        // Draw the ball
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fill();
+
+        // Request animation frame to continuously update the ball's position
+        requestAnimationFrame(updateBallPosition);
+      }
+
+      // Event listeners for key presses
+      var keysPressed = {};
+
+      document.addEventListener("keydown", function (event) {
+        keysPressed[event.key.toLowerCase()] = true;
+
+        if (keysPressed["a"]) {
+          ballVelocityX = -ballAcceleration;
+        } else if (keysPressed["d"]) {
+          ballVelocityX = ballAcceleration;
+        }
+      });
+
+      document.addEventListener("keyup", function (event) {
+        keysPressed[event.key.toLowerCase()] = false;
+
+        if (!keysPressed["a"] && !keysPressed["d"]) {
+          ballVelocityX = 0;
+        }
+      });
+
+      // Call the updateBallPosition function to start updating the ball's position
+      updateBallPosition();
+    </script>
+  </body>
+</html>
